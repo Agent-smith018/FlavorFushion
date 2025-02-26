@@ -1,0 +1,99 @@
+/* src/RegisterPage.css */
+
+/* Register page container */
+.register-page {
+    max-width: 450px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Heading styling */
+  .register-page h2 {
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  /* Form container */
+  .register-page form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Add space between form fields */
+  }
+  
+  /* Form field styling */
+  .register-page form div {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Label styling */
+  .register-page form label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 16px;
+  }
+  
+  /* Input field styling */
+  .register-page form input {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border 0.3s ease-in-out;
+  }
+  
+  .register-page form input:focus {
+    border-color: #4CAF50;
+    outline: none;
+  }
+  
+  /* Submit button styling */
+  .register-page form button {
+    padding: 14px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+  }
+  
+  .register-page form button:hover {
+    background-color: #45a049;
+  }
+  
+  .register-page form button:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+  }
+  
+  /* Error message styling */
+  .error {
+    color: red;
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  /* Link to login page */
+  .register-page .form-footer {
+    text-align: center;
+  }
+  
+  .register-page .form-footer a {
+    color: #4CAF50;
+    font-weight: bold;
+    text-decoration: none;
+  }
+  
+  .register-page .form-footer a:hover {
+    text-decoration: underline;
+  }
+  

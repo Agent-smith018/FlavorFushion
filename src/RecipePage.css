@@ -1,0 +1,42 @@
+.recipe-page-container {
+  padding: 20px;
+  text-align: center;
+}
+
+.recipe-image {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.recipe-actions {
+  margin-top: 20px;
+}
+
+.edit-button, .delete-button {
+  padding: 10px 15px;
+  margin: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.edit-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.edit-button:hover {
+  background-color: #0056b3;
+}
+
+.delete-button:hover {
+  background-color: #b22222;
+}

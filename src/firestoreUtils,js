@@ -1,0 +1,65 @@
+import { db, auth } from "./firebase";
+import { collection, addDoc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, doc } from "firebase/firestore";
+
+// Add sample recipes to Firestore (for the first time)
+export const addSampleRecipes = async () => {
+  const recipes = [
+    { title: "Spaghetti Carbonara", description: "Classic Italian pasta", category: "Main Course" },
+    { title: "Chocolate Cake", description: "Rich and moist chocolate cake", category: "Dessert" },
+    { title: "Vegetable Stir Fry", description: "Quick and healthy stir fry", category: "Vegetarian" }
+  ];
+
+  try {
+    for (const recipe of recipes) {
+      await addDoc(collection(db, "recipes"), recipe);
+    }
+    console.log("Sample recipes added!");
+  } catch (error) {
+    console.error("Error adding recipes: ", error);
+  }
+};
+
+// Add a liked recipe to the user's document
+export const likeRecipe = async (recipeId, category) => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const userRef = doc(db, "users", user.uid);
+
+  try {
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        likedRecipes: [recipeId],
+        likedCategories: [category]
+      });
+    } else {
+      await updateDoc(userRef, {
+        likedRecipes: arrayUnion(recipeId),
+        likedCategories: arrayUnion(category)
+      });
+    }
+    console.log("Recipe liked!");
+  } catch (error) {
+    console.error("Error liking recipe: ", error);
+  }
+};
+
+// Fetch recommended recipes based on user's liked categories
+export const fetchRecommendedRecipes = async () => {
+  const user = auth.currentUser;
+  if (!user) return [];
+
+  const userDoc = await getDoc(doc(db, "users", user.uid));
+  if (!userDoc.exists()) return [];
+
+  const { likedCategories = [] } = userDoc.data();
+
+  const recommendedQuery = query(
+    collection(db, "recipes"),
+    where("category", "in", likedCategories)
+  );
+
+  const querySnapshot = await getDocs(recommendedQuery);
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
