@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { db } from "./firebase"; // Import Firebase
-import { collection, getDocs } from "firebase/firestore";
+import { rtdb } from "./firebase"; // Import Firebase Realtime Database
+import { get, ref as rtdbRef } from "firebase/database"; // Firebase methods for Realtime Database
 import { useNavigate } from "react-router-dom";
 import "./RecipeListPage.css"; // Optional styling
 
@@ -9,16 +9,18 @@ const RecipeListPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Fetch recipes from Firestore
+  // Fetch recipes from Realtime Database
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "recipes"));
-        const recipesData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setRecipes(recipesData);
+        const recipeRef = rtdbRef(rtdb, "recipes");
+        const snapshot = await get(recipeRef);
+        if (snapshot.exists()) {
+          const recipesData = snapshot.val();
+          setRecipes(Object.entries(recipesData).map(([id, data]) => ({ id, ...data })));
+        } else {
+          console.log("No recipes found");
+        }
       } catch (error) {
         console.error("Error fetching recipes:", error);
       } finally {
@@ -38,13 +40,9 @@ const RecipeListPage = () => {
       <div className="recipe-list">
         {recipes.map((recipe) => (
           <div key={recipe.id} className="recipe-card">
-            <img src={recipe.imageURL} alt={recipe.title} className="recipe-image" />
             <h3>{recipe.title}</h3>
-            <p><strong>Category:</strong> {recipe.category}</p>
-            <p><strong>Cuisine:</strong> {recipe.cuisine}</p>
-            <button className="view-recipe-button" onClick={() => navigate(`/recipe/${recipe.id}`)}>
-              View Recipe
-            </button>
+            <p>{recipe.description}</p>
+            <button onClick={() => navigate(`/recipe/${recipe.id}`)}>View Recipe</button>
           </div>
         ))}
       </div>

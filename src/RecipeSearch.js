@@ -1,86 +1,54 @@
-// RecipeSearch.js
-import React, { useState } from "react";
-import { db } from "./firebase"; // Import Firebase db instance
-import { collection, query, where, getDocs } from "firebase/firestore"; // Firestore query functions
-import SearchBar from "./SearchBar"; // Import the SearchBar component
+// src/RecipeSearch.js
+import React, { useState, useEffect } from "react";
+import { rtdb } from "./firebase";  // Import Realtime Database
+import { ref, get } from "firebase/database";  // Realtime Database methods
+import './RecipeSearch.css';
 
 const RecipeSearch = () => {
   const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSearch = async (queryText) => {
-    setLoading(true);
-    try {
-      // Firestore query for recipes based on title, tags, and ingredients
-      const titleQuery = query(
-        collection(db, "recipes"),
-        where("title", ">=", queryText),
-        where("title", "<=", queryText + "\uf8ff")
-      );
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const snapshot = await get(ref(rtdb, 'recipes'));
+        if (snapshot.exists()) {
+          const recipesData = Object.keys(snapshot.val()).map((id) => ({
+            id,
+            ...snapshot.val()[id],
+          }));
+          setRecipes(recipesData);
+        } else {
+          console.log("No recipes found.");
+        }
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      }
+    };
 
-      const tagQuery = query(
-        collection(db, "recipes"),
-        where("tags", "array-contains", queryText)
-      );
+    fetchRecipes();
+  }, []);
 
-      const ingredientQuery = query(
-        collection(db, "recipes"),
-        where("ingredients", "array-contains", queryText)
-      );
-
-      // Execute queries concurrently
-      const titleSnapshot = await getDocs(titleQuery);
-      const tagSnapshot = await getDocs(tagQuery);
-      const ingredientSnapshot = await getDocs(ingredientQuery);
-
-      // Combine all the results
-      const combinedResults = [
-        ...titleSnapshot.docs.map((doc) => doc.data()),
-        ...tagSnapshot.docs.map((doc) => doc.data()),
-        ...ingredientSnapshot.docs.map((doc) => doc.data()),
-      ];
-
-      // Remove duplicates based on title
-      const uniqueResults = [
-        ...new Map(combinedResults.map((item) => [item.title, item])).values(),
-      ];
-
-      setRecipes(uniqueResults); // Set the recipes state with results
-    } catch (error) {
-      console.error("Error fetching recipes:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filteredRecipes = recipes.filter((recipe) =>
+    recipe.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div>
-      <h1>Search Recipes</h1>
-      <SearchBar onSearch={handleSearch} />
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div>
-          {recipes.length > 0 ? (
-            <ul>
-              {recipes.map((recipe, index) => (
-                <li key={index}>
-                  <h3>{recipe.title}</h3>
-                  <p>{recipe.description}</p>
-                  <img
-                    src={recipe.imageURL}
-                    alt={recipe.title}
-                    style={{ width: "100px", height: "100px" }}
-                  />
-                  <a href={`/recipe/${recipe.id}`}>View Recipe</a>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No recipes found</p>
-          )}
-        </div>
-      )}
+    <div className="recipe-search">
+      <input
+        type="text"
+        placeholder="Search for recipes"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      <div className="recipe-list">
+        {filteredRecipes.map((recipe) => (
+          <div key={recipe.id} className="recipe-card">
+            <img src={recipe.imageUrl} alt={recipe.title} />
+            <h3>{recipe.title}</h3>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

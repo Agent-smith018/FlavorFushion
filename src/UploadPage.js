@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { db, storage } from "./firebase"; // Firebase services
-import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { rtdb } from "./firebase"; // Import Firebase Realtime Database
+import { set, ref as rtdbRef } from "firebase/database"; // Firebase methods for Realtime Database
+import { storage } from "./firebase"; // Import Firebase Storage
 import "./UploadPage.css"; // Optional styling
 
 const UploadPage = () => {
@@ -97,11 +98,12 @@ const UploadPage = () => {
         tags: recipe.tags.split(",").map((item) => item.trim()), // Split tags by commas
         videoURL: recipe.videoURL,
         imageURL: imageURL, // Store the uploaded image URL
-        dateAdded: Timestamp.now(), // Store the current timestamp
+        dateAdded: new Date().toISOString(), // Use ISO date format instead of Timestamp
       };
 
-      // Upload the recipe data to Firestore
-      await addDoc(collection(db, "recipes"), recipeData); // Add the recipe to the "recipes" collection
+      // Upload the recipe data to Realtime Database
+      const newRecipeRef = rtdbRef(rtdb, 'recipes/' + Date.now()); // Use a unique ID based on the timestamp
+      await set(newRecipeRef, recipeData); // Add the recipe to Realtime Database
 
       // Clear form and reset state
       setRecipe({

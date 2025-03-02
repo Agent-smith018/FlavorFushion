@@ -1,6 +1,7 @@
 // src/ResetPasswordPage.js
 import React, { useState } from 'react';
-import { auth } from './firebase';  // Ensure you've set up Firebase authentication
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';  // Import Firebase auth functions
+import { useNavigate } from 'react-router-dom';
 import './ResetPasswordPage.css';
 
 const ResetPasswordPage = () => {
@@ -8,6 +9,9 @@ const ResetPasswordPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  const auth = getAuth();  // Get Firebase auth instance
+  const navigate = useNavigate();  // Hook to navigate the user after successful reset
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,8 +21,14 @@ const ResetPasswordPage = () => {
 
     try {
       // Firebase password reset logic
-      await auth.sendPasswordResetEmail(email);
+      await sendPasswordResetEmail(auth, email);
       setSuccessMessage('Password reset email sent. Check your inbox.');
+      
+      // Optionally navigate the user to the login page after successful reset
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);  // Redirect to login page after 3 seconds (you can adjust timing)
+      
     } catch (err) {
       setLoading(false);
       console.error('Error sending password reset email:', err.message);

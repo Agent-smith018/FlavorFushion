@@ -1,8 +1,8 @@
 // src/AddRecipePage.js
 import React, { useState } from 'react';
-import { db, storage } from './firebase';  // Import Firestore and Storage
-import { collection, addDoc } from 'firebase/firestore';  // Firestore functions
-import { ref, uploadBytes } from 'firebase/storage';  // Storage functions
+import { rtdb, storage } from './firebase';  // Import Realtime Database and Storage
+import { ref, set } from 'firebase/database';  // Realtime Database functions
+import { ref as storageRef, uploadBytes } from 'firebase/storage';  // Storage functions
 import './AddRecipePage.css';
 
 const AddRecipePage = () => {
@@ -29,18 +29,19 @@ const AddRecipePage = () => {
 
       // Upload image to Firebase Storage if there's an image
       if (image) {
-        const imageRef = ref(storage, `recipes/${image.name}`);
+        const imageRef = storageRef(storage, `recipes/${image.name}`);
         const snapshot = await uploadBytes(imageRef, image);
         imageUrl = await snapshot.ref.getDownloadURL();
       }
 
-      // Add recipe data to Firestore
-      await addDoc(collection(db, 'recipes'), {
+      // Save recipe data to Realtime Database
+      const recipeId = Date.now().toString(); // Simple ID based on timestamp
+      await set(ref(rtdb, 'recipes/' + recipeId), {
         title,
         description,
         category,
         imageUrl,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       });
 
       setTitle('');

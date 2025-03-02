@@ -1,6 +1,7 @@
+// src/RecipePage.js
 import React, { useEffect, useState } from "react";
-import { db } from "./firebase"; // Firebase services
-import { doc, getDoc, deleteDoc } from "firebase/firestore";
+import { rtdb } from "./firebase"; // Import Realtime Database
+import { ref, get, remove } from "firebase/database"; // Import necessary Realtime Database functions
 import { useParams, useNavigate } from "react-router-dom";
 import "./RecipePage.css"; // Optional styling
 
@@ -10,14 +11,14 @@ const RecipePage = () => {
   const { id } = useParams(); // Get recipe ID from URL
   const navigate = useNavigate();
 
-  // Fetch recipe from Firestore by ID
+  // Fetch recipe from Realtime Database by ID
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        const docRef = doc(db, "recipes", id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setRecipe(docSnap.data());
+        const recipeRef = ref(rtdb, "recipes/" + id);
+        const snapshot = await get(recipeRef);
+        if (snapshot.exists()) {
+          setRecipe(snapshot.val());
         } else {
           console.log("No such document!");
         }
@@ -37,7 +38,8 @@ const RecipePage = () => {
     if (!confirmDelete) return;
 
     try {
-      await deleteDoc(doc(db, "recipes", id)); // Delete recipe from Firestore
+      const recipeRef = ref(rtdb, 'recipes/' + id); // Use Realtime Database reference
+      await remove(recipeRef); // Remove recipe from Realtime Database
       alert("Recipe deleted successfully!");
       navigate("/recipes"); // Redirect to Recipe List Page after deletion
     } catch (error) {
@@ -51,35 +53,10 @@ const RecipePage = () => {
   return (
     <div className="recipe-page-container">
       <h1>{recipe.title}</h1>
-      <img src={recipe.imageURL} alt={recipe.title} className="recipe-image" />
+      <img src={recipe.imageUrl} alt={recipe.title} className="recipe-image" />
       <p><strong>Category:</strong> {recipe.category}</p>
-      <p><strong>Cuisine:</strong> {recipe.cuisine}</p>
-      <p><strong>Servings:</strong> {recipe.servings}</p>
-      <p><strong>Total Time:</strong> {recipe.totalTime} minutes</p>
-      <h3>Description</h3>
-      <p>{recipe.description}</p>
-      <h3>Ingredients</h3>
-      <ul>
-        {recipe.ingredients.map((ingredient, index) => (
-          <li key={index}>{ingredient}</li>
-        ))}
-      </ul>
-      <h3>Steps</h3>
-      <ol>
-        {recipe.steps.map((step, index) => (
-          <li key={index}>{step}</li>
-        ))}
-      </ol>
-      {recipe.videoURL && (
-        <div>
-          <h3>Watch the Video</h3>
-          <a href={recipe.videoURL} target="_blank" rel="noopener noreferrer">
-            {recipe.videoURL}
-          </a>
-        </div>
-      )}
-
-      {/* Edit and Delete Buttons */}
+      <p><strong>Created At:</strong> {recipe.createdAt}</p>
+      {/* Add the rest of the recipe fields here */}
       <div className="recipe-actions">
         <button className="edit-button" onClick={() => navigate(`/edit-recipe/${id}`)}>
           Edit Recipe

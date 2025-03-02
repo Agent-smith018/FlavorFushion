@@ -1,74 +1,60 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { Link } from "react-router-dom"; // Import Link component
-import "./LoginPage.css"; // Ensure your CSS styles are correct
+import { useNavigate } from "react-router-dom";
+import "./LoginPage.css";
 
-const Login = () => {
-  const [email, setEmail] = useState(""); // Store email
-  const [password, setPassword] = useState(""); // Store password
-  const [error, setError] = useState(""); // Store error messages
-  const navigate = useNavigate(); // React Router hook for navigation
+const LoginPage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Handle login logic
-  const handleLogin = async (e) => {
+  const auth = getAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
-
-    const auth = getAuth(); // Get Firebase auth instance
+    setError("");
+    setLoading(true);
 
     try {
-      // Sign in with email and password
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user; // Get user details on success
-
-      console.log("User logged in:", user);
-
-      // Redirect to homepage (or any page you want)
-      navigate("/"); // Navigate to the homepage
-
-    } catch (error) {
-      // Handle error if login fails
-      console.error("Error logging in:", error.message);
-      setError("Failed to login: " + error.message); // Display error message
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("User logged in successfully.");
+      navigate("/dashboard"); // Redirect to dashboard
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-container">
-      <h1>Login</h1>
-
-      {error && <div className="error-message">{error}</div>} {/* Display error if any */}
-
-      <form onSubmit={handleLogin}>
-        {/* Email Input */}
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)} // Update email state
-          required
-        />
-
-        {/* Password Input */}
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)} // Update password state
-          required
-        />
-
-        {/* Login Button */}
-        <button type="submit">Login</button>
-      </form>
-
-      {/* Forgot Password Link */}
-      <div className="forgot-password">
-        <Link to="/reset-password">Forgot your password?</Link>
+      <div className="login-card">
+        <h2>Login to Your Account</h2>
+        {error && <div className="error-message">{error}</div>}
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div className="form-group">
+            <label>Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+          <button type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
+        </form>
+        
+        {/* Add a link to register page */}
+        <p className="redirect-message">
+          Don't have an account?{" "}
+          <span onClick={() => navigate("/register")} className="register-link">
+            Register here
+          </span>
+        </p>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default LoginPage;
