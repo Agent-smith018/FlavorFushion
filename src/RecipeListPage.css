@@ -1,41 +1,118 @@
-.recipe-list-container {
-  padding: 20px;
-  text-align: center;
+/* Base Styles for RecipeListPage */
+.recipe-list-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  padding: 40px 15px;
+  min-height: 100vh;
 }
 
-.recipe-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+/* Header Style */
+.recipe-list-page h1, .recipe-list-page h2 {
+  color: #333;
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 25px;
+}
+
+.recipe-list-page h2 {
+  font-size: 1.6rem;
+  color: #555;
+}
+
+/* Recipe List Container */
+.recipe-container {
+  display: flex;
+  flex-wrap: wrap;
   gap: 20px;
-  margin-top: 20px;
+  justify-content: center;
 }
 
 .recipe-card {
   background-color: #fff;
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 280px;
+  padding: 20px;
   text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.recipe-image {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 10px;
+.recipe-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-.view-recipe-button {
-  margin-top: 10px;
-  padding: 10px;
-  border: none;
-  background-color: #007bff;
+.recipe-card h3 {
+  font-size: 1.4rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.recipe-card p {
+  font-size: 1rem;
+  color: #777;
+  margin-bottom: 15px;
+  height: 60px; /* Limit the description text height */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recipe-card button {
+  padding: 10px 20px;
+  font-size: 1.1rem;
   color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
-  border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 
-.view-recipe-button:hover {
+.recipe-card button:hover {
   background-color: #0056b3;
+}
+
+.recipe-card button:disabled {
+  background-color: #c0c0c0;
+  cursor: not-allowed;
+}
+
+.recipe-card button:focus {
+  outline: none;
+}
+
+/* Drafts Section */
+.draft-section {
+  margin-top: 40px;
+}
+
+.draft-section .recipe-card {
+  background-color: #f5f5f5;
+  border: 1px dashed #ddd;
+}
+
+.draft-section .recipe-card h3 {
+  color: #444;
+}
+
+/* Empty State Message */
+.empty-state {
+  text-align: center;
+  color: #888;
+  font-size: 1.2rem;
+  font-style: italic;
+  margin-top: 30px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .recipe-card {
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto;
+  }
+
+  .recipe-list-page h1, .recipe-list-page h2 {
+    font-size: 1.5rem;
+  }
 }

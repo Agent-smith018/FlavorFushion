@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { rtdb } from "./firebase"; // Import Firebase Realtime Database
-import { set, ref as rtdbRef } from "firebase/database"; // Firebase methods for Realtime Database
-import { storage } from "./firebase"; // Import Firebase Storage
-import "./UploadPage.css"; // Optional styling
+import { ref, set } from "firebase/database";
+import { auth, rtdb, storage, uploadBytes, getDownloadURL } from "./firebase"; // Correct import
+import { getAuth } from "firebase/auth";
+import "./UploadPage.css";
 
 const UploadPage = () => {
   const [recipe, setRecipe] = useState({
@@ -16,26 +15,26 @@ const UploadPage = () => {
     servings: "",
     category: "",
     cuisine: "",
-    tags: "",
-    videoURL: "",
-    image: null,
+    image: null, // Image file selected by the user
   });
+
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // Success message state
-  const navigate = useNavigate();
 
-  // Handle input change for text fields
+  const navigate = useNavigate();
+  const user = getAuth().currentUser; // Get the current logged-in user
+
+  // Handle text input change
   const handleChange = (e) => {
     setRecipe({ ...recipe, [e.target.name]: e.target.value });
   };
 
-  // Handle file selection
+  // Handle image file change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setRecipe({ ...recipe, image: file });
 
+    // Preview the image
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -45,92 +44,57 @@ const UploadPage = () => {
     }
   };
 
-  // Form validation
-  const validateForm = () => {
-    if (!recipe.title || !recipe.description || !recipe.ingredients || !recipe.steps || !recipe.servings || !recipe.category || !recipe.cuisine) {
-      return "All fields except video URL and tags are required.";
-    }
-    if (recipe.servings <= 0) {
-      return "Servings must be a positive number.";
-    }
-    return "";
-  };
+  // Function to upload recipe and image to Firebase
+  const handleUploadRecipe = async () => {
+    const { title, description, ingredients, steps } = recipe;
 
-  // Handle form submission for upload
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccessMessage(""); // Reset success message before submitting
-    setUploading(true);
-    console.log("Form submitted!");
+    // Check if required fields are filled
+    if (!title.trim() || !description.trim() || !ingredients.trim() || !steps.trim()) {
+      alert("Please fill in all the required fields before uploading.");
+      return;
+    }
 
-    // Validate form fields
-    const validationError = validateForm();
-    if (validationError) {
-      console.log("Validation error:", validationError);
-      setError(validationError);
-      setUploading(false);
+    if (!user) {
+      alert("You must be logged in to upload a recipe.");
       return;
     }
 
     try {
-      let imageURL = "";
+      setUploading(true);
+      let imageURL = null;
 
-      // If a new image is selected, upload it to Firebase Storage
+      // Step 1: Upload the image to Firebase Storage
       if (recipe.image) {
-        const imageRef = ref(storage, `recipes/${recipe.image.name}`);
+        // Create a reference to the storage path
+        const imageRef = ref(storage, `recipes/${Date.now()}_${recipe.image.name}`);
+        // Upload the image
         await uploadBytes(imageRef, recipe.image);
-        imageURL = await getDownloadURL(imageRef); // Get the image URL after upload
-      } else {
-        imageURL = imagePreview; // Use existing image URL if no new image is uploaded
+        // Step 2: Get the download URL of the uploaded image
+        imageURL = await getDownloadURL(imageRef);
       }
 
-      // Prepare the recipe data object
+      // Step 3: Prepare the recipe data
       const recipeData = {
-        title: recipe.title,
-        description: recipe.description,
-        ingredients: recipe.ingredients.split(",").map((item) => item.trim()), // Split ingredients by commas
-        steps: recipe.steps.split(".").map((item) => item.trim()), // Split steps by periods
-        totalTime: recipe.totalTime,
-        servings: Number(recipe.servings),
-        category: recipe.category,
-        cuisine: recipe.cuisine,
-        tags: recipe.tags.split(",").map((item) => item.trim()), // Split tags by commas
-        videoURL: recipe.videoURL,
-        imageURL: imageURL, // Store the uploaded image URL
-        dateAdded: new Date().toISOString(), // Use ISO date format instead of Timestamp
+        ...recipe,
+        imageURL: imageURL || null, // Add image URL if uploaded
+        userId: user.uid, // User ID of the uploader
+        userName: user.displayName || "Anonymous User", // If available, otherwise "Anonymous User"
+        timestamp: Date.now(), // Store the timestamp of the upload
       };
 
-      // Upload the recipe data to Realtime Database
-      const newRecipeRef = rtdbRef(rtdb, 'recipes/' + Date.now()); // Use a unique ID based on the timestamp
-      await set(newRecipeRef, recipeData); // Add the recipe to Realtime Database
+      // Remove the image file object (we don’t need to store the raw file in the database)
+      delete recipeData.image;
 
-      // Clear form and reset state
-      setRecipe({
-        title: "",
-        description: "",
-        ingredients: "",
-        steps: "",
-        totalTime: "",
-        servings: "",
-        category: "",
-        cuisine: "",
-        tags: "",
-        videoURL: "",
-        image: null,
-      });
+      // Step 4: Save the recipe data to Firebase Realtime Database
+      const newRecipeRef = ref(rtdb, `recipes/${Date.now()}`); // Unique reference using timestamp
+      await set(newRecipeRef, recipeData); // Store the recipe data
 
-      setImagePreview(null);
+      alert("Recipe uploaded successfully!");
       setUploading(false);
-      setSuccessMessage("Recipe uploaded successfully!"); // Set success message
-
-      // Delay the navigation to Recipe List Page
-      setTimeout(() => {
-        navigate("/"); // Redirect to homepage or recipe listing page after a short delay
-      }, 1500); // Delay navigation by 1.5 seconds
+      navigate("/recipes"); // Navigate to the recipes page
     } catch (error) {
       console.error("Error uploading recipe:", error);
-      setError("Error uploading recipe.");
+      alert("Error uploading recipe. Please try again.");
       setUploading(false);
     }
   };
@@ -138,109 +102,75 @@ const UploadPage = () => {
   return (
     <div className="upload-container">
       <h1>Upload Your Recipe</h1>
-
-      {/* Display error or success messages */}
-      {error && <div className="error-message">{error}</div>}
-      {successMessage && <div className="success-message">{successMessage}</div>}
-
-      {/* Recipe Upload Form */}
-      <form onSubmit={handleSubmit}>
+      <form>
         <input
           type="text"
           name="title"
-          placeholder="Recipe Title"
-          onChange={handleChange}
           value={recipe.title}
+          onChange={handleChange}
+          placeholder="Title"
           required
-          disabled={uploading}
         />
         <textarea
           name="description"
-          placeholder="Short Description"
-          onChange={handleChange}
           value={recipe.description}
+          onChange={handleChange}
+          placeholder="Description"
           required
-          disabled={uploading}
         />
         <textarea
           name="ingredients"
-          placeholder="Ingredients (comma-separated)"
-          onChange={handleChange}
           value={recipe.ingredients}
+          onChange={handleChange}
+          placeholder="Ingredients"
           required
-          disabled={uploading}
         />
         <textarea
           name="steps"
-          placeholder="Steps (separated by periods)"
-          onChange={handleChange}
           value={recipe.steps}
+          onChange={handleChange}
+          placeholder="Steps"
           required
-          disabled={uploading}
         />
         <input
           type="text"
           name="totalTime"
-          placeholder="Total Time"
-          onChange={handleChange}
           value={recipe.totalTime}
-          disabled={uploading}
+          onChange={handleChange}
+          placeholder="Total Time (e.g., 30 minutes)"
         />
         <input
-          type="number"
+          type="text"
           name="servings"
-          placeholder="Servings"
-          onChange={handleChange}
           value={recipe.servings}
-          required
-          disabled={uploading}
+          onChange={handleChange}
+          placeholder="Servings"
         />
-        <select
+        <input
+          type="text"
           name="category"
-          onChange={handleChange}
           value={recipe.category}
-          required
-          disabled={uploading}
-        >
-          <option value="">Select Category</option>
-          <option value="Main Course">Main Course</option>
-          <option value="Dessert">Dessert</option>
-        </select>
-        <select
+          onChange={handleChange}
+          placeholder="Category (e.g., Dessert, Main Course)"
+        />
+        <input
+          type="text"
           name="cuisine"
-          onChange={handleChange}
           value={recipe.cuisine}
-          required
+          onChange={handleChange}
+          placeholder="Cuisine (e.g., Italian, Indian)"
+        />
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+        {imagePreview && (
+          <img src={imagePreview} alt="Preview" style={{ maxWidth: "200px" }} />
+        )}
+
+        <button
+          type="button"
+          onClick={handleUploadRecipe}
           disabled={uploading}
         >
-          <option value="">Select Cuisine</option>
-          <option value="Italian">Italian</option>
-          <option value="Chinese">Chinese</option>
-        </select>
-        <input
-          type="text"
-          name="tags"
-          placeholder="Tags (comma-separated)"
-          onChange={handleChange}
-          value={recipe.tags}
-          disabled={uploading}
-        />
-        <input
-          type="text"
-          name="videoURL"
-          placeholder="Video URL (optional)"
-          onChange={handleChange}
-          value={recipe.videoURL}
-          disabled={uploading}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          disabled={uploading}
-        />
-        <button type="submit" disabled={uploading}>
-          {uploading ? "Uploading..." : "Upload Recipe"}
+          {uploading ? "Uploading Recipe..." : "Upload Recipe"}
         </button>
       </form>
     </div>

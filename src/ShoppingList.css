@@ -1,0 +1,242 @@
+/* General Page Styling */
+.shopping-list {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2, h3, h4, h5 {
+    color: #333;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  h3, h4 {
+    margin-bottom: 10px;
+  }
+  
+  /* Recipe Selection */
+  .recipe-selection {
+    margin-bottom: 20px;
+  }
+  
+  .recipe-selection select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+  
+  .selected-recipe {
+    margin-top: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .selected-recipe h4 {
+    margin-top: 0;
+  }
+  
+  .selected-recipe p {
+    margin-top: 10px;
+    color: #666;
+  }
+  
+  .recipe-image {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 10px;
+    border-radius: 8px;
+  }
+  
+  /* Search Bar */
+  .search-bar {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .search-bar input {
+    width: 80%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 10px;
+  }
+  
+  /* Shopping List Container */
+  .shopping-list-container {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .ingredient-category {
+    margin-bottom: 20px;
+  }
+  
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+  }
+  
+  .category-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  
+  .ingredient-category ul {
+    padding-left: 20px;
+  }
+  
+  .ingredient {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    padding: 8px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .ingredient:hover {
+    background-color: #f7f7f7;
+  }
+  
+  .ingredient.checked {
+    text-decoration: line-through;
+    color: #aaa;
+  }
+  
+  .ingredient svg {
+    margin-right: 10px;
+    color: #3498db;
+  }
+  
+  .ingredient.checked svg {
+    color: #2ecc71;
+  }
+  
+  /* Filtered Shopping List */
+  .filtered-shopping-list {
+    margin-top: 20px;
+  }
+  
+  .filtered-shopping-list h3 {
+    margin-bottom: 10px;
+  }
+  
+  .filtered-shopping-list ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .filtered-shopping-list li {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    padding: 8px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .filtered-shopping-list li:hover {
+    background-color: #f7f7f7;
+  }
+  
+  .filtered-shopping-list .ingredient.checked {
+    text-decoration: line-through;
+    color: #aaa;
+  }
+  
+  /* Action Buttons */
+  .actions {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .save-btn, .share-btn, .clear-btn, .back-btn {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .save-btn {
+    background-color: #27ae60;
+    color: white;
+  }
+  
+  .save-btn:hover {
+    background-color: #2ecc71;
+  }
+  
+  .share-btn {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .share-btn:hover {
+    background-color: #2980b9;
+  }
+  
+  .clear-btn {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .clear-btn:hover {
+    background-color: #c0392b;
+  }
+  
+  .back-btn {
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  .back-btn:hover {
+    background-color: #e67e22;
+  }
+  
+  /* Clear Button Container */
+  .clear-button-container {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  /* Footer */
+  .footer {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .footer .back-btn {
+    margin-top: 10px;
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  .footer .back-btn:hover {
+    background-color: #e67e22;
+  }
+  

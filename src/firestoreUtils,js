@@ -1,4 +1,4 @@
-import { db, auth } from "./firebase";
+import { rtdb, auth } from "./firebase";
 import { collection, addDoc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, doc } from "firebase/firestore";
 
 // Add sample recipes to Firestore (for the first time)

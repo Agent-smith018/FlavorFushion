@@ -18,9 +18,20 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // Sign in with email and password
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
       console.log("User logged in successfully.");
-      navigate("/dashboard"); // Redirect to dashboard
+
+      // Check if the logged-in user is the admin
+      if (user.uid === "UIEuQe42TUg0euOtDIvbNFLlrPJ2") {
+        // Admin logged in, redirect to Admin Panel
+        navigate("/admin");
+      } else {
+        // Regular user logged in, redirect to Personal Details Page or Dashboard
+        navigate("/personal-details");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -36,20 +47,38 @@ const LoginPage = () => {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
-          <button type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
-        
-        {/* Add a link to register page */}
+
         <p className="redirect-message">
-          Don't have an account?{" "}
+          Don't have an account?{' '}
           <span onClick={() => navigate("/register")} className="register-link">
             Register here
+          </span>
+        </p>
+
+        <p className="redirect-message">
+          Forgot your password?{' '}
+          <span onClick={() => navigate("/reset-password")} className="reset-password-link">
+            Reset Password
           </span>
         </p>
       </div>
